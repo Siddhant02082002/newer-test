@@ -19,7 +19,12 @@ app.use(cookieParser());
 app.use("/api/healthcheck", apiFetch);
 app.use("/api/status", status);
 
-// Export the app for Vercel
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+// });
+Export the app for Vercel
 export default (req, res) => {
     app(req, res);
 };
