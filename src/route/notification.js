@@ -11,10 +11,10 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const OWNER = process.env.OWNER;
 const REPO = process.env.REPO;
 
-async function getWorkflowRun(runId) {
+async function getWorkflowRun(branch) {
     try {
         const response = await axios.get(
-            `https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${runId}`,
+            `https://api.github.com/repos/${OWNER}/${REPO}/actions/runs`,
             {
                 headers: {
                     Authorization: `token ${GITHUB_TOKEN}`,
@@ -22,9 +22,11 @@ async function getWorkflowRun(runId) {
                 }
             }
         );
-        return response.data;
+        const runs = response.data.workflow_runs.filter(run => run.head_branch === branch);
+        const latestRun = runs.find(run => run.status === 'completed');
+        return latestRun;
     } catch (error) {
-        console.error('Error fetching workflow run details:', error.response ? error.response.data : error.message);
+        console.error('Error fetching workflow run:', error.response ? error.response.data : error.message);
     }
 }
 
@@ -40,7 +42,6 @@ async function downloadArtifacts(runId) {
             }
         );
         const artifacts = response.data.artifacts;
-
         for (const artifact of artifacts) {
             const downloadResponse = await axios.get(
                 artifact.archive_download_url,
@@ -52,17 +53,14 @@ async function downloadArtifacts(runId) {
                     responseType: 'stream'
                 }
             );
-            
-            // Save the artifact to /tmp directory
-            const outputPath = path.join('/tmp', `${artifact.name}.zip`);
+            const outputPath = path.join(__dirname, '..', "Result", `${artifact.name}.zip`);
             const writer = fs.createWriteStream(outputPath);
             downloadResponse.data.pipe(writer);
 
             writer.on('finish', async () => {
                 console.log(`Downloaded ${artifact.name} to ${outputPath}`);
-                
-                // Extract the zip file
-                const extractPath = path.join('/tmp', 'extracted', artifact.name);
+                // Extract the zip file into the extracted folder
+                const extractPath = path.join(__dirname, '..', "extracted", artifact.name);
                 await fs.promises.mkdir(extractPath, { recursive: true });
                 fs.createReadStream(outputPath)
                     .pipe(unzipper.Extract({ path: extractPath }))
@@ -76,20 +74,20 @@ async function downloadArtifacts(runId) {
     }
 }
 
+
 router.post('/', async (req, res) => {
     try {
-        const { workflow_run } = req.body;
+        // const { workflow_run } = req.body;
 
-        if (!workflow_run) {
-            return res.status(400).json({ message: 'Invalid notification payload' });
-        }
+        // if (!workflow_run) {
+        //     return res.status(400).json({ message: 'Invalid notification payload' });
+        // }
+        let run;
+        run = await getWorkflowRun(branch);
 
-        const runId = workflow_run.id;
-        const runDetails = await getWorkflowRun(runId);
-
-        if (runDetails.conclusion === 'success') {
+        if (run.conclusion === 'success') {
             console.log('Workflow completed successfully. Downloading and extracting artifacts...');
-            await downloadArtifacts(runId);
+            await downloadArtifacts(run.id);
             res.json({ message: 'Workflow completed successfully and artifacts downloaded.' });
         } else {
             res.json({ message: 'Workflow did not complete successfully.' });
