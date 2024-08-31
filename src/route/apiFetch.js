@@ -185,9 +185,9 @@ router.post('/', async (req, res) => {
         // Polling the workflow status
         let run;
         while (!run || run.status !== 'completed') {
-            await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds before checking again
+            await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 10 seconds before checking again
             run = await getWorkflowRun(branch);
-            console.log(run);
+            
         }
 
         if (run.conclusion === 'success') {
