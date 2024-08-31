@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import apiFetch from "./route/apiFetch.js"
+import status from "./route/check-api.js"
 const app = express()
 
 app.use(cors({
@@ -15,7 +16,7 @@ app.use(cookieParser())
 
 // Simple route handlers
 app.use("/api/healthcheck",apiFetch)
-
+app.use("api/status",status)
 // Server listening
 const PORT = /*process.env.PORT*/ 8000;
 app.listen(PORT, () => {
