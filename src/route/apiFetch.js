@@ -28,6 +28,7 @@ function askQuestion(query) {
 }
 
 async function triggerWorkflow(inputUrl, branch) {
+    console.log("pika")
     try {
         const response = await axios.post(
             `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
