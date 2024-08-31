@@ -7,14 +7,14 @@
       }
     ],
     "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "/src/route/apiFetch.js"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "/src/route/check-api.js"
-      }
-    ]
+    {
+      "src": "/api/healthcheck",
+      "dest": "/src/route/apiFetch.js"
+    },
+    {
+      "src": "/api/status",
+      "dest": "/src/route/check-api.js"
+    }
+  ]
   }
   
