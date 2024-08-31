@@ -18,7 +18,7 @@ app.use(cookieParser());
 // Simple route handlers
 app.use("/api/healthcheck", apiFetch);
 app.use("/api/status", status);
-
+app.use("/api/notification", status);
 
 // const PORT = process.env.PORT || 3000;
 // app.listen(PORT, () => {

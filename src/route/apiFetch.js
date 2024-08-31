@@ -183,20 +183,20 @@ router.post('/', async (req, res) => {
         console.log(`Waiting for the workflow to complete on branch ${branch}...`);
 
         // Polling the workflow status
-        let run;
-        while (!run || run.status !== 'completed') {
-            await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 10 seconds before checking again
-            run = await getWorkflowRun(branch);
+        // let run;
+        // while (!run || run.status !== 'completed') {
+        //     await new Promise(resolve => setTimeout(resolve, 30000)); // Wait 10 seconds before checking again
+        //     run = await getWorkflowRun(branch);
             
-        }
+        // }
 
-        if (run.conclusion === 'success') {
-            console.log('Workflow completed successfully. Downloading and extracting artifacts...');
-            await downloadArtifacts(run.id);
-            res.json({ message: 'Workflow completed successfully and artifacts downloaded.' });
-        } else {
-            res.json({ message: 'Workflow did not complete successfully.' });
-        }
+        // if (run.conclusion === 'success') {
+        //     console.log('Workflow completed successfully. Downloading and extracting artifacts...');
+        //     await downloadArtifacts(run.id);
+        //     res.json({ message: 'Workflow completed successfully and artifacts downloaded.' });
+        // } else {
+        //     res.json({ message: 'Workflow did not complete successfully.' });
+        // }
     } catch (error) {
         console.error('Error in POST request handler:', error.message);
         res.status(500).json({ message: 'Error processing request', error: error.message });
