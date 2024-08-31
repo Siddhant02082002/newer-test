@@ -183,9 +183,9 @@ router.post('/', async (req, res) => {
         console.log(`Waiting for the workflow to complete on branch ${branch}...`);
 
         // Polling the workflow status
-        console.log("pika");
         let run;
         while (!run || run.status !== 'completed') {
+            console.log("pika");
             await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds before checking again
             run = await getWorkflowRun(branch);
         }
