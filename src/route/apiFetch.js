@@ -69,6 +69,52 @@ async function getWorkflowRun(branch) {
     }
 }
 
+// async function downloadArtifacts(runId) {
+//     try {
+//         const response = await axios.get(
+//             `https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${runId}/artifacts`,
+//             {
+//                 headers: {
+//                     Authorization: `token ${GITHUB_TOKEN}`,
+//                     Accept: 'application/vnd.github.v3+json'
+//                 }
+//             }
+//         );
+//         const artifacts = response.data.artifacts;
+//         for (const artifact of artifacts) {
+//             const downloadResponse = await axios.get(
+//                 artifact.archive_download_url,
+//                 {
+//                     headers: {
+//                         Authorization: `token ${GITHUB_TOKEN}`,
+//                         Accept: 'application/vnd.github.v3+json'
+//                     },
+//                     responseType: 'stream'
+//                 }
+//             );
+//             const outputPath = path.join(__dirname, '..', "Result", `${artifact.name}.zip`);
+//             const writer = fs.createWriteStream(outputPath);
+//             downloadResponse.data.pipe(writer);
+
+//             writer.on('finish', async () => {
+//                 console.log(`Downloaded ${artifact.name} to ${outputPath}`);
+//                 // Extract the zip file into the extracted folder
+//                 const extractPath = path.join(__dirname, '..', "extracted", artifact.name);
+//                 await fs.promises.mkdir(extractPath, { recursive: true });
+//                 fs.createReadStream(outputPath)
+//                     .pipe(unzipper.Extract({ path: extractPath }))
+//                     .on('close', () => {
+//                         console.log(`Extracted ${artifact.name} to ${extractPath}`);
+//                     });
+//             });
+//         }
+//     } catch (error) {
+//         console.error('Error downloading artifacts:', error.response ? error.response.data : error.message);
+//     }
+// }
+
+
+
 async function downloadArtifacts(runId) {
     try {
         const response = await axios.get(
@@ -92,14 +138,19 @@ async function downloadArtifacts(runId) {
                     responseType: 'stream'
                 }
             );
-            const outputPath = path.join(__dirname, '..', "Result", `${artifact.name}.zip`);
+            // Use Vercel's tmp directory
+            const outputPath = path.join('/tmp', `${artifact.name}.zip`);
+            console.log(`Saving ${artifact.name}.zip to ${outputPath}`);
             const writer = fs.createWriteStream(outputPath);
             downloadResponse.data.pipe(writer);
 
             writer.on('finish', async () => {
                 console.log(`Downloaded ${artifact.name} to ${outputPath}`);
-                // Extract the zip file into the extracted folder
-                const extractPath = path.join(__dirname, '..', "extracted", artifact.name);
+                // Extract the zip file into the extracted folder inside /tmp
+                const files = fs.readdirSync('/tmp');
+                console.log('Files in /tmp after download:', files);
+                const extractPath = path.join('/tmp', "extracted", artifact.name);
+                console.log(`Extracting ${artifact.name} to ${extractPath}`);
                 await fs.promises.mkdir(extractPath, { recursive: true });
                 fs.createReadStream(outputPath)
                     .pipe(unzipper.Extract({ path: extractPath }))
@@ -112,6 +163,7 @@ async function downloadArtifacts(runId) {
         console.error('Error downloading artifacts:', error.response ? error.response.data : error.message);
     }
 }
+
 
 const router = Router();
 
