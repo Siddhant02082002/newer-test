@@ -24,7 +24,7 @@ app.use("/api/status", status);
 // app.listen(PORT, () => {
 //     console.log(`Server is running on http://localhost:${PORT}`);
 // });
-Export the app for Vercel
+// Export the app for Vercel
 export default (req, res) => {
     app(req, res);
 };
